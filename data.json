@@ -1,0 +1,320 @@
+{
+  "items": {
+    "огнетушитель": {
+      "description": "Огнетушитель из спасательной капсулы.",
+      "usable": false
+    },
+    "планшет": {
+      "description": "Запись: Безопасный путь в пещере — влево → вправо → влево.",
+      "usable": false
+    },
+    "вода": {
+      "description": "Бутылка воды.",
+      "usable": true,
+      "effect": "drink"
+    },
+    "еда": {
+      "description": "Пищевой паёк Alterra.",
+      "usable": true,
+      "effect": "eat"
+    },
+    "аптечка": {
+      "description": "Полностью восстанавливает здоровье.",
+      "usable": true,
+      "effect": "heal"
+    },
+    "металлолом": {
+      "description": "Можно переработать в титан.",
+      "usable": true,
+      "effect": "salvage"
+    },
+    "титан": {
+      "description": "Строительный материал.",
+      "usable": false
+    },
+    "нож": {
+      "description": "Самодельный титановый нож.",
+      "usable": false
+    }
+  },
+
+  "locations": {
+    "capsule": {
+      "name": "Спасательная капсула",
+      "surface": true,
+      "description": {
+        "fire": "Капсула горит. Пламя подбирается к кислородным баллонам.",
+        "safe": "Пожар потушен. Внутри пахнет гарью.",
+        "normal": "Капсула в порядке. Внутри чисто и сухо."
+      },
+      "actions": [
+        {
+          "id": "take_extinguisher",
+          "text": "Взять огнетушитель",
+          "effects": { "inventory_add": "огнетушитель" }
+        },
+        {
+          "id": "extinguish_fire",
+          "text": "Потушить пожар",
+          "custom_logic": "extinguish_fire",
+          "result_text": "Вы потушили пожар."
+        },
+        {
+          "id": "take_tablet",
+          "text": "Поднять планшет",
+          "effects": { "inventory_add": "планшет" }
+        },
+        {
+          "id": "open_crate",
+          "text": "Открыть ящик с припасами",
+          "requires": [
+            { "flag": "fire_extinguished" },
+            { "flag": "crate_opened", "state": false }
+          ],
+          "effects": {
+            "inventory_add": ["вода", "вода", "еда", "еда"],
+            "flag_set": "crate_opened"
+          },
+          "result_text": "Вы открыли ящик и нашли две бутылки воды и два пайка."
+        },
+        {
+          "id": "craft_knife",
+          "text": "Собрать нож",
+          "custom_logic": "craft_knife"
+        },
+        {
+          "id": "go_top",
+          "text": "Вылезти через верхний люк",
+          "next_location": "capsule_top"
+        },
+        {
+          "id": "go_water",
+          "text": "Спуститься в воду",
+          "next_location": "underwater"
+        }
+      ]
+    },
+    "capsule_top": {
+      "name": "Крыша капсулы",
+      "surface": true,
+      "description": "Вы стоите на крыше спасательной капсулы.",
+      "actions": [
+        {
+          "id": "back_capsule",
+          "text": "Вернуться в капсулу",
+          "next_location": "capsule"
+        },
+        {
+          "id": "jump_water",
+          "text": "Прыгнуть в воду",
+          "next_location": "underwater"
+        }
+      ]
+    },
+    "underwater": {
+      "name": "Под водой",
+      "underwater": true,
+      "description": "Вдали видны обломки Авроры и вход в пещеру.",
+      "actions": [
+        {
+          "id": "surface",
+          "text": "Всплыть за воздухом",
+          "next_location": "water_surface"
+        },
+        {
+          "id": "go_cave",
+          "text": "Плыть к пещере",
+          "custom_logic": "check_cave_available",
+          "next_location": "cave_entrance"
+        },
+        {
+          "id": "go_wreck",
+          "text": "Плыть к обломкам",
+          "next_location": "wreck"
+        },
+        {
+          "id": "return_capsule",
+          "text": "Вернуться в капсулу",
+          "next_location": "capsule"
+        }
+      ]
+    },
+    "cave_entrance": {
+      "name": "Вход в пещеру",
+      "underwater": true,
+      "description": "Перед вами тёмная подводная пещера.",
+      "actions": [
+        {
+          "id": "enter_cave",
+          "text": "Заплыть глубже",
+          "custom_logic": "init_cave_puzzle",
+          "result_text": "Вы заплываете в пещеру. Темнота сгущается...",
+          "next_location": "cave_path"
+        },
+        {
+          "id": "leave_cave",
+          "text": "Вернуться назад",
+          "next_location": "underwater"
+        }
+      ]
+    },
+    "cave_entrance_completed": {
+      "name": "Вход в пещеру",
+      "underwater": true,
+      "description": "Пещера уже пройдена, здесь больше нечего делать.",
+      "actions": [
+        {
+          "id": "leave_cave",
+          "text": "Вернуться назад",
+          "next_location": "underwater"
+        }
+      ]
+    },
+    "cave_path": {
+      "name": "Развилка пещеры",
+      "underwater": true,
+      "description": "Перед вами три прохода.",
+      "actions": [
+        {
+          "id": "go_left",
+          "text": "Повернуть налево",
+          "custom_logic": "cave_choice"
+        },
+        {
+          "id": "go_right",
+          "text": "Повернуть направо",
+          "custom_logic": "cave_choice"
+        },
+        {
+          "id": "go_straight",
+          "text": "Плыть прямо",
+          "custom_logic": "cave_choice"
+        }
+      ]
+    },
+    "air_pocket": {
+      "name": "Воздушный карман",
+      "surface": true,
+      "description": "Здесь можно перевести дух.",
+      "actions": [
+        {
+          "id": "restore_oxygen",
+          "text": "Подышать воздухом",
+          "custom_logic": "restore_oxygen"
+        },
+        {
+          "id": "continue_cave",
+          "text": "Продолжить путь",
+          "next_location": "cave_end"
+        }
+      ]
+    },
+    "cave_end": {
+      "name": "Конец пещеры",
+      "underwater": true,
+      "description": "Здесь лежит аптечка и титан.",
+      "actions": [
+        {
+          "id": "take_medkit",
+          "text": "Взять аптечку",
+          "effects": { "inventory_add": "аптечка" }
+        },
+        {
+          "id": "take_titan",
+          "text": "Собрать титан",
+          "effects": { "inventory_add": "титан" }
+        },
+        {
+          "id": "leave_end",
+          "text": "Вернуться обратно",
+          "next_location": "underwater",
+          "effects": { "flag_set": "cave_completed" }
+        }
+      ]
+    },
+    "water_surface": {
+      "name": "Поверхность воды",
+      "surface": true,
+      "description": "Вы всплываете на поверхность. Вокруг бескрайний океан, небо затянуто дымом от пожаров на Авроре. Глубоко вдохнув, вы наполняете лёгкие свежим воздухом.",
+      "actions": [
+        {
+          "id": "dive_back",
+          "text": "Нырнуть обратно",
+          "custom_logic": "dive_back"
+        }
+      ]
+    },
+    "wreck": {
+      "name": "Обломки Авроры",
+      "underwater": true,
+      "description": "Металлические конструкции уходят в темноту.",
+      "actions": [
+        {
+          "id": "search_wreck",
+          "text": "Обыскать обломки",
+          "custom_logic": "search_wreck"
+        },
+        {
+          "id": "surface",
+          "text": "Всплыть за воздухом",
+          "next_location": "water_surface"
+        },
+        {
+          "id": "go_deeper",
+          "text": "Плыть дальше в туман",
+          "next_location": "leviathan_zone"
+        },
+        {
+          "id": "back_water",
+          "text": "Вернуться назад",
+          "next_location": "underwater"
+        }
+      ]
+    },
+    "leviathan_zone": {
+      "name": "Глубокие воды",
+      "underwater": true,
+      "description": "Вдали движется огромный силуэт.",
+      "actions": [
+        {
+          "id": "approach_leviathan",
+          "text": "Подплыть ближе",
+          "custom_logic": "leviathan_encounter"
+        },
+        {
+          "id": "retreat",
+          "text": "Уплыть",
+          "next_location": "wreck"
+        }
+      ]
+    },
+    "leviathan_fight": {
+      "name": "Левиафан-жнец",
+      "underwater": true,
+      "description": "Перед вами огромный Жнец. Он готовится к атаке.",
+      "actions": [
+        {
+          "id": "attack_leviathan",
+          "text": "Атаковать ножом",
+          "custom_logic": "attack_leviathan"
+        },
+        {
+          "id": "retreat_fight",
+          "text": "Отступить",
+          "next_location": "wreck"
+        }
+      ]
+    },
+    "victory": {
+      "name": "Победа",
+      "description": "Жнец повержен. Воды вокруг капсулы стали безопаснее.",
+      "actions": [
+        {
+          "id": "end_game",
+          "text": "Завершить игру",
+          "custom_logic": "end_game"
+        }
+      ]
+    }
+  }
+}

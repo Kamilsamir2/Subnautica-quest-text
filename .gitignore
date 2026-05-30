@@ -1,0 +1,19 @@
+# Скомпилированные файлы Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Папки сборки PyInstaller
+build/
+dist/
+*.spec
+
+# Сохранённая игра
+savegame.json
+
+icon.ico 
+favicon.ico
+
+# Системные файлы Windows
+Thumbs.db
+.DS_Store
