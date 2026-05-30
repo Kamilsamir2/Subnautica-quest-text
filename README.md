@@ -23,3 +23,5 @@
 
 ## Лицензия
 MIT
+
+Доп материалы: иконка взята с https://icons8.ru/icons/set/subnautica
